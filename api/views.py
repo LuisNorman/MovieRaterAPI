@@ -12,6 +12,22 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()  # what set of records in the db to use
     serializer_class = UserSerializer
 
+    permission_classes_by_action = {'create': [AllowAny],
+                                    'list': [IsAuthenticated]}
+
+    def create(self, request, *args, **kwargs):
+        return super(UserViewSet, self).create(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        return super(UserViewSet, self).list(request, *args, **kwargs)
+
+    def get_permissions(self):
+        try:
+            # return permission_classes depending on `action`
+            return [permission() for permission in self.permission_classes_by_action[self.action]]
+        except KeyError:
+            # action is not set return default permission_classes
+            return [permission() for permission in self.permission_classes]
 
 class MovieViewSet(viewsets.ModelViewSet):
     queryset = Movie.objects.all()  # what set of records in the db to use
